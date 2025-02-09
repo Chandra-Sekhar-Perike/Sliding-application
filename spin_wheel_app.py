@@ -1,7 +1,22 @@
 import streamlit as st
 from datetime import datetime, timedelta
-from streamlit.components.v1 import html
-import time
+import base64
+
+# Function to encode an image to Base64
+def get_img_as_base64(file_path):
+    with open(file_path, "rb") as file:
+        return base64.b64encode(file.read()).decode()
+
+# Paths to your local images
+background_image_path = "background_img.jpg"  # Replace with your background image filename
+logo1_image_path = "college_logo.jpg"  # Replace with your logo image filename
+logo2_image_path = "talos_logo.jpeg"  # Replace with your logo image filename
+
+
+# Encode the images
+background_base = get_img_as_base64(background_image_path)
+logo1_base = get_img_as_base64(logo1_image_path)
+logo2_base = get_img_as_base64(logo2_image_path)
 
 # Google Doc links
 links = [
@@ -19,15 +34,6 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# Header Section
-col1, col2, col3 = st.columns([1, 3, 1])
-with col1:
-    st.image("college_logo.jpg", width=100)
-with col2:
-    st.markdown("<h1 style='text-align: center; color: #4CAF50;'>Plot-A-Thon by TALOS</h1>", unsafe_allow_html=True)
-with col3:
-    st.image("talos_logo.jpeg", width=100)
-
 # Initialize session state for last spin time if not present
 if 'last_spin_time' not in st.session_state:
     st.session_state.last_spin_time = None
@@ -44,107 +50,157 @@ else:
 
 button_disabled = time_remaining.total_seconds() > 0
 
-# Display Cooldown Message if the button is disabled
-cooldown_placeholder = st.empty()
-if button_disabled:
-    while button_disabled:
-        minutes, seconds = divmod(time_remaining.total_seconds(), 60)
-        cooldown_placeholder.markdown(f"⏳ **Please wait {int(minutes)} minutes and {int(seconds)} seconds** before spinning again.")
-        time.sleep(1)  # Refresh every second
-        time_now = datetime.now()
-        time_remaining = cooldown_period - (time_now - st.session_state.last_spin_time)
-        button_disabled = time_remaining.total_seconds() > 0
-    cooldown_placeholder.empty()  # Clear the message once the cooldown ends
-
-# Generate the HTML for the fixed boxes with a sliding box
-box_html = f"""
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Slide Box</title>
+# Inject CSS directly into Streamlit
+st.markdown(
+    f"""
     <style>
+        /* Override Streamlit's default body settings */
         body {{
+            margin: 0;
+            padding: 0;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                              url("data:image/jpeg;base64,{background_base}");
+            background-size: cover; /* Ensure background image covers the screen */
+            background-position: center; /* Center the image */
+            background-repeat: no-repeat; /* Do not repeat the image */
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; /* Prevent unwanted scrollbars */
+        }}
+        /* Style for Streamlit's main app container */
+        .stApp {{
+            background: none;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-size: cover;
-            background-position: center center;
+            flex-direction: column;
         }}
-
-        .box-container {{
-            position: relative;
-            width: 90%;
-            height: 150px;
+         /* Logo styling */
+        .logo-container {{
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-top: 20px;
+            width: 100%;
         }}
+        .logo {{
+            width: 10%;
+            max-width: 100px;
+            height: auto;
+            border-radius: 50%;
+        }}
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
-        .box {{
-            width: 120px;
-            height: 100%;
-            background: #333;
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 18px;
-            border-radius: 10px;
-        }}
+# Inject HTML directly into Streamlit
+st.markdown(
+    f"""
+    <div class="logo-container">
+        <img class="logo" src="data:image/png;base64,{logo1_base}" alt="College Logo">
+        <img class="logo" src="data:image/png;base64,{logo2_base}" alt="Talos Logo">
+    </div>
+    <h2 style="text-align: center; color: White;">PLOT-O-THON</h2>
+    <h6 style="text-align: center; color: White;">A Technical Event organized by</h6>
+    <h3 style="text-align: center; color: White;">Department of ARTIFICIAL INTELLIGENCE & DATA SCIENCE</h3>
+    """,
+    unsafe_allow_html=True,
+)
 
-        .highlighted {{
-            background-color: #FFD700;
-        }}
+# Render your custom content
+html_code = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Slide Box</title>
+    <style>
+        /* Container for all content */
+            .content {{
+                position: relative;
+                z-index: 10;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+                width: 100%;
+                text-align: center;
+            }}
 
-        .pointer {{
-            position: absolute;
-            top: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 40px;
-            height: 20px;
-            background: #333;
-            clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
-        }}
+            .box-container {{
+                position: relative;
+                width: 90%;
+                height: 150px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 20px;
+            }}
 
-        button {{
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }}
+            .box {{
+                width: 120px;
+                height: 100%;
+                background: #333;
+                color: #fff;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 18px;
+                border-radius: 10px;
+            }}
 
-        button:hover {{
-            background: #0056b3;
-        }}
+            .highlighted {{
+                background-color: #FFD700;
+            }}
 
-        button:disabled {{
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }}
+            .pointer {{
+                position: absolute;
+                top: -20px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 40px;
+                height: 20px;
+                background: #333;
+                clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+            }}
+
+            button {{
+                margin-top: 20px;
+                padding: 10px 20px;
+                font-size: 16px;
+                cursor: pointer;
+                background: #007bff;
+                color: white;
+                border: none;
+                border-radius: 5px;
+            }}
+
+            button:hover {{
+                background: #0056b3;
+            }}
+
+            button:disabled {{
+                background-color: #cccccc;
+                cursor: not-allowed;
+            }}
     </style>
 </head>
 <body>
-    <div class="box-container" id="box-container">
-        <!-- Fixed boxes will be here -->
-        <div class="box">{links[0]['label']}</div>
-        <div class="box">{links[1]['label']}</div>
-        <div class="box">{links[2]['label']}</div>
-        <div class="box">{links[3]['label']}</div>
-        <div class="box">{links[4]['label']}</div>
+    <div class="content">
+        <!-- Box Container -->
+        <div class="box-container" id="box-container">
+            <div class="box">{links[0]['label']}</div>
+            <div class="box">{links[1]['label']}</div>
+            <div class="box">{links[2]['label']}</div>
+            <div class="box">{links[3]['label']}</div>
+            <div class="box">{links[4]['label']}</div>
+        </div>
+
+        <!-- Pointer and Spin Button -->
+        <div class="pointer" id="pointer"></div>
+        <button id="spin-btn" {"disabled" if button_disabled else ""}>Spin the Boxes</button>
     </div>
-    <div class="pointer" id="pointer"></div>
-    <button id="spin-btn" {('disabled' if button_disabled else '')}>Spin the Boxes</button>
 
     <script>
         const links = {links};
@@ -167,14 +223,14 @@ box_html = f"""
             // Remove any previous highlights
             boxes.forEach((box, index) => {{
                 box.classList.remove("highlighted");
-            }});
+            }})
 
             // Start moving the pointer across the boxes
             let counter = 0;
             interval = setInterval(() => {{
                 boxes.forEach((box, index) => {{
                     box.classList.remove("highlighted");
-                }});
+                }})
                 boxes[counter].classList.add("highlighted");
                 pointer.style.left = "calc(" + (counter * 20) + "% + 10px)"; // Move pointer
 
@@ -216,5 +272,4 @@ box_html = f"""
 </html>
 """
 
-# Embed the sliding box HTML into Streamlit
-html(box_html, height=400)
+st.components.v1.html(html_code, height=700)
