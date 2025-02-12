@@ -20,11 +20,11 @@ logo2_base = get_img_as_base64(logo2_image_path)
 
 # Google Doc links
 links = [
-    {"label": "TRAVEL", "url": "https://docs.google.com/document/d/1/example1"},
-    {"label": "FOOD", "url": "https://docs.google.com/document/d/2/example2"},
-    {"label": "HEALTH", "url": "https://docs.google.com/document/d/3/example3"},
-    {"label": "EDUCATION", "url": "https://docs.google.com/document/d/4/example4"},
-    {"label": "GROCERY", "url": "https://docs.google.com/document/d/5/example5"},
+    {"label": "TRAVEL", "url": "https://drive.google.com/drive/folders/1BEAgdXZxRDCvaRrb9YjOGmpUtuTWTjwp?usp=sharing"},
+    {"label": "FOOD", "url": "https://drive.google.com/drive/folders/1XGoxqLrUgsR5dTz7yuFly3PHHg7KWBL-?usp=sharing"},
+    {"label": "HEALTH", "url": "https://drive.google.com/drive/folders/1XGoxqLrUgsR5dTz7yuFly3PHHg7KWBL-?usp=sharing"},
+    {"label": "EDUCATION", "url": "https://drive.google.com/drive/folders/146lAMmugl7lV1xrnh7zCMqrb_49zbpOk?usp=sharing"},
+    {"label": "GROCERY", "url": "https://drive.google.com/drive/folders/1lqQdrGbCPWg0j-76dNznwz8Zkl4bBUww?usp=sharing"},
 ]
 
 # Streamlit Page Configuration
